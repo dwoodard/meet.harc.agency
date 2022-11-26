@@ -58,6 +58,11 @@ Route::get('/',  function(){
 })
 ->name('home');
 
+//Rooms
+Route::resource('rooms', 'RoomController');
+
+
+
 //Profile
 Route::get('/profile', function (){
     return Inertia::render('profile/Show', []);
