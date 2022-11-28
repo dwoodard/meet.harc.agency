@@ -53,5 +53,9 @@
     "vuedraggable": "^2.24.3",
     "vuetify": "^2.5.4",
     "yamljs": "^0.3.0"
+  },
+  "dependencies": {
+    "simple-signal-client": "^3.0.0",
+    "socket.io": "^4.5.4"
   }
 }
