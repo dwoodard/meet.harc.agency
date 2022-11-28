@@ -9,23 +9,10 @@ fi
 
 export COMPOSER_ALLOW_SUPERUSER=1
 
-production_path='UPDATE_PRODUCTION_PATH'
+ 
 
-if [ $production_path == 'UPDATE_PRODUCTION_PATH' ]; then
-    echo $production_path
-fi
-
-env=$(if [ "$(pwd)" = $production_path ]; then echo 'production'; else echo "local"; fi)
-
-echo " "
-if [ "$env" == 'production' ]; then
-  echo "$env $production_path"
-  service apache2 stop #digital ocean try to run apache2 on startup
-
-else
-  echo "$env $(pwd)"
-fi
-
+env= "local"
+echo "$env $(pwd)"
 echo "--- php: $(php -r 'echo PHP_VERSION;') ---"
 echo "--- composer: $(composer -V | awk '{ print $3 }') ---"
 
@@ -34,77 +21,37 @@ if [ "$env" != 'production' ]; then
   echo "--- node: $(node -v || echo 'run: node install') ---"
 fi
 
-#check if prod passwords have been changed
-if [ "$env" == "prod" ]; then
-  if [ ! -f "./laradock/.env.prod" ]; then
-    cp ./laradock/.env.prod.example ./laradock/.env.prod
-    echo '.env.prod Added '
-  fi
-
-  if [ ! -f ".env" ]; then
-    cp .env.example .env
-    echo '.env Added '
-  fi
-
-  if grep -q "^MYSQL_ROOT_PASSWORD.*changeme" laradock/.env.prod; then
-    echo '--- NEED TO CHANGE DB_PASSWORD in laradock/.env.prod ---'
-    exit 1
-  fi
-
-  if grep -q "^DB_PASSWORD.*root" .env; then
-    echo '--- NEED TO CHANGE DB_PASSWORD in .env ---'
-    exit 1
-  fi
-fi
-
 #check permissions
 chmod -R 777 storage
 
 # run laradock
-if [ "$env" == 'production' ]; then
-  #  PROD
-
-  if [ ${1:-1} == 'build' ]; then
-    docker-compose --env-file ./laradock/.env.prod -f laradock/docker-compose.yml build \
-      nginx \
-      php-worker \
-      laravel-horizon
-  else
-    docker-compose --env-file ./laradock/.env.prod -f laradock/docker-compose.yml up -d \
-      nginx \
-      php-worker \
-      laravel-horizon
-  fi
+if [ ${1:-1} == 'build' ]; then
+  cd laradock || exit
+  docker-compose build \
+    nginx \
+    mysql \
+    php-worker \
+    laravel-horizon \
+    mailhog \
+    phpmyadmin
 else
-  #  LOCAL
-
-  if [ ${1:-1} == 'build' ]; then
-    cd laradock || exit
-    docker-compose build \
-      nginx \
-      mysql \
-      php-worker \
-      laravel-horizon \
-      mailhog \
-      phpmyadmin
-  else
-    cd laradock || exit
-    docker-compose up -d \
-      nginx \
-      mysql \
-      php-worker \
-      laravel-horizon \
-      mailhog \
-      phpmyadmin
-    cd ..
+  cd laradock || exit
+  docker-compose up -d \
+    nginx \
+    mysql \
+    php-worker \
+    laravel-horizon \
+    mailhog \
+    phpmyadmin
+  cd ..
 
 
-    echo 'Website: http://localhost'
-    echo 'Phpmyadmin: http://localhost:8081 root:root'
-    echo 'Redis: http://localhost:9987 laradock:laradock'
-  fi
-
+  echo 'Website: http://localhost'
+  echo 'Phpmyadmin: http://localhost:8081 root:root'
+  echo 'Redis: http://localhost:9987 laradock:laradock'
 fi
+
+ 
 
 #check composer packages are installed
 if [ ! -d "vendor" ]; then
@@ -133,4 +80,8 @@ else
   docker exec -it laradock-workspace-1 sh -c "php artisan migrate"
 fi
 
+#run seeder if needed
+if [ ${1:-1} == 'fresh-seed' ]; then
+  docker exec -it laradock-workspace-1 sh -c "php artisan migrate:fresh --seed"
+fi
 $SHELL
