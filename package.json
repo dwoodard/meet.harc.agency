@@ -55,6 +55,8 @@
     "yamljs": "^0.3.0"
   },
   "dependencies": {
+    "laravel-echo": "^1.14.2",
+    "pusher-js": "^7.5.0",
     "simple-signal-client": "^3.0.0",
     "socket.io": "^4.5.4"
   }
