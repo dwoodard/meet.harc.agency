@@ -37,7 +37,9 @@ Route::group(['as'=>'admin.','middleware' => ['web','role:admin|superadmin']], f
     //settings
     Route::resource('site-settings', 'Admin\SiteSettingController');
 
-
+    //rooms
+    Route::resource('rooms', 'RoomController')
+    ->only(['index']);
 
 
 });

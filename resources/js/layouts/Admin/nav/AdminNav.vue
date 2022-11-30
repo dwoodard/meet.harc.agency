@@ -61,6 +61,11 @@
             icon: 'mdi-account'
           },
           {
+            title: 'Rooms',
+            link: '/admin/rooms',
+            icon: 'mdi-account-box-multiple-outline'
+          },
+          {
             title: 'Pages',
             link: '/admin/pages',
             icon: 'mdi-file-document-multiple-outline'

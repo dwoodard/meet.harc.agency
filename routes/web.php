@@ -58,9 +58,9 @@ Route::get('/',  function(){
 })
 ->name('home');
 
-//Rooms
-Route::resource('rooms', 'RoomController');
-
+//Room show
+ Route::get('/rooms/{room:uid}', [\App\Http\Controllers\RoomController::class, 'show'])
+    ->name('rooms.show');
 
 
 //Profile

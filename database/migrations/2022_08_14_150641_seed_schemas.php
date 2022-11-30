@@ -16,7 +16,8 @@ class SeedSchemas extends Migration
      */
     public function up()
     {
-        SchemaSeeder::run();
+        $schemaSeeder = new SchemaSeeder();
+        $schemaSeeder->run();
     }
 
     /**
